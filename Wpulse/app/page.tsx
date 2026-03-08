@@ -412,7 +412,7 @@ export default function HomePage() {
             <a href="https://quantumdev.fr" style={{ color: "#64748B", textDecoration: "none" }} target="_blank" rel="noopener noreferrer">QuantumDev</a>
           </div>
           <div style={{ display: "flex", gap: 24 }}>
-            {[{ label: "Mentions légales", href: "/mentions-legales" }, { label: "CGV", href: "/cgv" }].map(({ label, href }) => (
+            {[{ label: "Mentions légales", href: "/mentions-legales" }, { label: "CGV", href: "/cgv" }, { label: "Confidentialité", href: "/confidentialite" }].map(({ label, href }) => (
               <a key={href} href={href} style={{ color: "#64748B", textDecoration: "none" }}>{label}</a>
             ))}
           </div>
