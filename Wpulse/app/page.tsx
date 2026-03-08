@@ -2,24 +2,21 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { Nav } from "@/components/Nav";
 
 function useCounter(target: number, duration = 2200, delay = 0) {
   const [count, setCount] = useState(0);
   const [started, setStarted] = useState(false);
-
   useEffect(() => {
     const t = setTimeout(() => setStarted(true), delay);
     return () => clearTimeout(t);
   }, [delay]);
-
   useEffect(() => {
     if (!started) return;
     let raf: number;
     const startTime = performance.now();
-
     function tick(now: number) {
-      const elapsed = now - startTime;
-      const p = Math.min(elapsed / duration, 1);
+      const p = Math.min((now - startTime) / duration, 1);
       const eased = 1 - Math.pow(1 - p, 3);
       setCount(Math.round(eased * target));
       if (p < 1) raf = requestAnimationFrame(tick);
@@ -27,7 +24,6 @@ function useCounter(target: number, duration = 2200, delay = 0) {
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
   }, [started, target, duration]);
-
   return { count, started };
 }
 
@@ -36,547 +32,393 @@ export default function HomePage() {
   const [error, setError] = useState("");
   const router = useRouter();
 
-  const vulns = useCounter(11334, 2400, 800);
-  const pluginPct = useCounter(96, 1800, 1000);
-  const hours = useCounter(5, 1400, 1200);
+  const vulns = useCounter(11334, 2400, 1000);
+  const pluginPct = useCounter(96, 1800, 1200);
+  const hours = useCounter(5, 1400, 1400);
 
   function isValidUrl(input: string): boolean {
     try {
       const parsed = new URL(input);
       return parsed.protocol === "http:" || parsed.protocol === "https:";
-    } catch {
-      return false;
-    }
+    } catch { return false; }
   }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = url.trim();
     if (!trimmed) { setError("Entrez l'URL de votre site WordPress."); return; }
-    const normalized =
-      trimmed.startsWith("http://") || trimmed.startsWith("https://")
-        ? trimmed : `https://${trimmed}`;
+    const normalized = trimmed.startsWith("http://") || trimmed.startsWith("https://")
+      ? trimmed : `https://${trimmed}`;
     if (!isValidUrl(normalized)) { setError("URL invalide. Exemple : votresite.fr"); return; }
     router.push(`/scan?url=${encodeURIComponent(normalized)}`);
   }
 
+  const px = "clamp(1.25rem, 5vw, 3rem)";
+
   return (
-    <main style={{ background: "#060A10", minHeight: "100dvh" }}>
+    <>
+      <Nav />
+      <main style={{ background: "#050A12" }}>
 
-      {/* ══════════════════════════════════════════════
-          HERO
-      ══════════════════════════════════════════════ */}
-      <section
-        className="relative flex flex-col justify-center"
-        style={{ minHeight: "100dvh", padding: "0 clamp(1rem, 5vw, 3.5rem)" }}
-      >
-        {/* Background: dot grid + blue glow */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          aria-hidden="true"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle, rgba(255,255,255,0.04) 1px, transparent 1px)",
-            backgroundSize: "28px 28px",
-          }}
-        />
-        <div
-          className="absolute inset-0 pointer-events-none"
-          aria-hidden="true"
-          style={{
-            background:
-              "radial-gradient(ellipse 75% 55% at 50% -5%, rgba(37,99,235,0.13) 0%, transparent 65%)",
-          }}
-        />
+        {/* ── HERO ─────────────────────────────────── */}
+        <section style={{ paddingTop: 140, paddingBottom: 80, paddingLeft: px, paddingRight: px, textAlign: "center" }}>
+          <div style={{ maxWidth: 720, margin: "0 auto" }}>
 
-        {/* Scanline */}
-        <div className="scanline-wrap" aria-hidden="true" />
-
-        {/* Top bar */}
-        <div
-          className="relative flex items-center justify-between"
-          style={{ paddingTop: "clamp(1.25rem, 4vw, 2rem)", marginBottom: "clamp(2.5rem, 8vw, 5rem)" }}
-        >
-          <div className="flex items-center gap-2.5">
-            <span
-              style={{
-                width: 7, height: 7, borderRadius: "50%",
-                background: "#3B82F6",
-                animation: "pulse 2s ease-in-out infinite",
-                boxShadow: "0 0 8px rgba(59,130,246,0.6)",
-              }}
-            />
-            <span
-              className="font-mono text-text-muted uppercase tracking-widest"
-              style={{ fontSize: "0.65rem" }}
-            >
-              WPulse
-            </span>
-          </div>
-          <span
-            className="font-mono text-text-muted/40 uppercase tracking-widest"
-            style={{ fontSize: "0.6rem" }}
-          >
-            by QuantumDev
-          </span>
-        </div>
-
-        {/* ─── H1 — massive, editorial ─── */}
-        <div className="relative" style={{ marginBottom: "clamp(2rem, 6vw, 3.5rem)" }}>
-          <h1
-            className="font-heading font-bold uppercase"
-            style={{
-              fontSize: "clamp(3.4rem, 12vw, 10.5rem)",
-              lineHeight: 0.88,
-              letterSpacing: "-0.01em",
-            }}
-          >
-            <span
-              className="hero-word block text-text-primary"
-              style={{ animationDelay: "0.05s" }}
-            >
-              Prenez
-            </span>
-            <span
-              className="hero-word block"
-              style={{
-                animationDelay: "0.18s",
-                color: "#F9FAFB",
-              }}
-            >
-              le pouls
-            </span>
-            <span
-              className="hero-word block"
-              style={{
-                animationDelay: "0.31s",
-                color: "#2563EB",
-                textShadow: "0 0 60px rgba(37,99,235,0.25)",
-              }}
-            >
-              WordPress.
-            </span>
-          </h1>
-        </div>
-
-        {/* ─── Subtitle + form ─── */}
-        <div
-          className="hero-word relative"
-          style={{
-            animationDelay: "0.48s",
-            maxWidth: "min(520px, 100%)",
-          }}
-        >
-          <p
-            className="text-text-secondary leading-relaxed"
-            style={{ fontSize: "clamp(0.9rem, 2.2vw, 1.1rem)", marginBottom: "1.5rem" }}
-          >
-            Scan gratuit en 30 secondes. Découvrez ce qui ralentit,
-            fragilise et expose votre site — avant que les pirates le trouvent.
-          </p>
-
-          <form onSubmit={handleSubmit}>
-            {/* Terminal input */}
-            <div className={`terminal-wrap${error ? " has-error" : ""}`} style={{ marginBottom: "0.75rem" }}>
-              <span
-                className="absolute font-mono text-primary-500 select-none"
-                style={{
-                  left: "1rem",
-                  top: "50%",
-                  transform: "translateY(-50%)",
-                  fontSize: "1.1rem",
-                  opacity: 0.8,
-                }}
-                aria-hidden="true"
-              >
-                ›
-              </span>
-              <input
-                type="text"
-                value={url}
-                onChange={(e) => { setUrl(e.target.value); setError(""); }}
-                placeholder="votresite.fr"
-                className="w-full bg-transparent text-text-primary font-mono focus:outline-none placeholder:text-text-muted/40"
-                style={{
-                  padding: "1rem 1rem 1rem 2.4rem",
-                  fontSize: "clamp(0.85rem, 2vw, 0.95rem)",
-                }}
-                autoFocus
-                autoComplete="url"
-                inputMode="url"
-              />
+            {/* Badge */}
+            <div style={{
+              display: "inline-flex", alignItems: "center", gap: 8,
+              padding: "6px 16px", borderRadius: 100,
+              border: "1px solid rgba(239,68,68,0.2)",
+              background: "rgba(239,68,68,0.08)",
+              fontFamily: "var(--font-mono)", fontSize: "0.8rem",
+              color: "#EF4444", marginBottom: 32, letterSpacing: "0.02em",
+            }}>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#EF4444", animation: "blink 1.5s ease-in-out infinite" }} />
+              11 334 failles WordPress découvertes en 2025
             </div>
 
-            {error && (
-              <p className="font-mono text-danger" style={{ fontSize: "0.72rem", marginBottom: "0.6rem" }}>
-                ✗ {error}
-              </p>
-            )}
-
-            <button
-              type="submit"
-              className="cta-btn w-full text-white font-heading font-bold uppercase"
+            {/* H1 */}
+            <h1
+              className="font-heading"
               style={{
-                background: "linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)",
-                borderRadius: "12px",
-                padding: "1rem 1.5rem",
-                fontSize: "clamp(0.85rem, 2.5vw, 1rem)",
-                letterSpacing: "0.1em",
+                fontWeight: 800,
+                fontSize: "clamp(2.5rem, 7vw, 4.5rem)",
+                lineHeight: 1.05,
+                letterSpacing: "-0.02em",
+                textTransform: "uppercase",
+                marginBottom: 24,
+                color: "#F1F5F9",
               }}
             >
-              Scanner mon site
-              <span
-                className="font-mono normal-case"
-                style={{ marginLeft: "0.75rem", opacity: 0.55, fontSize: "0.75rem", letterSpacing: "0.02em" }}
-              >
-                — gratuit
-              </span>
-            </button>
+              Votre site WordPress<br />
+              <span style={{ color: "#3B82F6" }}>est-il vraiment sécurisé ?</span>
+            </h1>
 
-            <p
-              className="text-center font-mono text-text-muted/50"
-              style={{ fontSize: "0.65rem", marginTop: "0.75rem", letterSpacing: "0.05em" }}
-            >
-              SANS INSCRIPTION · SANS CARTE · RÉSULTAT IMMÉDIAT
+            {/* Sub */}
+            <p style={{
+              fontSize: "clamp(1rem, 2.5vw, 1.2rem)",
+              color: "#94A3B8",
+              maxWidth: 560, margin: "0 auto 40px",
+              lineHeight: 1.6,
+            }}>
+              <strong style={{ color: "#F1F5F9", fontWeight: 600 }}>Dirigeants, indépendants, e-commerçants</strong>{" "}
+              — votre site accumule peut-être des failles de sécurité et des problèmes de performance.
+              Découvrez-les en 30 secondes, avant que quelqu&apos;un d&apos;autre ne les trouve.
             </p>
-          </form>
-        </div>
 
-        {/* Scroll hint */}
-        <div
-          className="hero-word absolute"
-          style={{
-            animationDelay: "1.1s",
-            bottom: "2rem",
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "0.4rem",
-            opacity: 0.25,
-          }}
-          aria-hidden="true"
-        >
-          <span className="font-mono uppercase text-text-muted" style={{ fontSize: "0.55rem", letterSpacing: "0.15em" }}>
-            scroll
-          </span>
-          <div
-            style={{
-              width: 1,
-              height: 28,
-              background: "rgba(156,163,175,0.5)",
-              animation: "scrollDrop 1.8s ease-in-out infinite",
-            }}
-          />
-        </div>
-      </section>
+            {/* Scan input */}
+            <div style={{ maxWidth: 520, margin: "0 auto" }}>
+              <form onSubmit={handleSubmit}>
+                <div className={`scan-wrap${error ? " !border-danger" : ""}`}
+                  style={{ flexDirection: "row" as const }}>
+                  <input
+                    type="text"
+                    value={url}
+                    onChange={(e) => { setUrl(e.target.value); setError(""); }}
+                    placeholder="https://votresite.fr"
+                    style={{
+                      flex: 1, padding: "16px 20px",
+                      background: "transparent", border: "none", outline: "none",
+                      color: "#F1F5F9",
+                      fontFamily: "var(--font-mono)", fontSize: "0.95rem",
+                    }}
+                    autoFocus
+                    autoComplete="url"
+                    inputMode="url"
+                  />
+                  <button
+                    type="submit"
+                    style={{
+                      padding: "16px 28px",
+                      background: "#2563EB",
+                      color: "white", border: "none", cursor: "pointer",
+                      fontFamily: "var(--font-heading)",
+                      fontWeight: 700, fontSize: "0.95rem",
+                      letterSpacing: "0.06em", textTransform: "uppercase",
+                      whiteSpace: "nowrap", transition: "background 0.2s",
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = "#1D4ED8")}
+                    onMouseLeave={e => (e.currentTarget.style.background = "#2563EB")}
+                  >
+                    Scanner mon site →
+                  </button>
+                </div>
+                {error && (
+                  <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.78rem", color: "#EF4444", marginTop: 8, textAlign: "left" }}>
+                    {error}
+                  </p>
+                )}
+              </form>
+              <div style={{
+                display: "flex", justifyContent: "center", gap: 24,
+                marginTop: 16, fontSize: "0.8rem", color: "#64748B",
+                fontFamily: "var(--font-mono)",
+              }}>
+                {["✓ Gratuit", "✓ Sans inscription", "✓ 30 secondes"].map(t => (
+                  <span key={t} style={{ color: t.startsWith("✓") ? undefined : undefined }}>
+                    <span style={{ color: "#22C55E" }}>{t.split(" ")[0]}</span>{" "}{t.split(" ").slice(1).join(" ")}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
 
-      {/* ══════════════════════════════════════════════
-          STATS — chiffres monumentaux
-      ══════════════════════════════════════════════ */}
-      <section
-        style={{
-          background: "#060A10",
-          borderTop: "1px solid rgba(255,255,255,0.05)",
-          padding: "clamp(3rem, 8vw, 6rem) clamp(1rem, 5vw, 3.5rem)",
-        }}
-      >
-        <div style={{ maxWidth: "56rem", margin: "0 auto" }}>
-          <p
-            className="font-mono text-text-muted/50 uppercase tracking-widest"
-            style={{ fontSize: "0.6rem", marginBottom: "2.5rem" }}
-          >
-            — Source : Patchstack Security Report 2025
-          </p>
-
-          <div
-            style={{
+        {/* ── URGENCY STATS ─────────────────────────── */}
+        <section style={{
+          padding: `32px ${px}`,
+          background: "#0B1120",
+          borderTop: "1px solid rgba(255,255,255,0.06)",
+          borderBottom: "1px solid rgba(255,255,255,0.06)",
+        }}>
+          <div style={{ maxWidth: 900, margin: "0 auto" }}>
+            <div style={{
               display: "grid",
               gridTemplateColumns: "repeat(3, 1fr)",
-              gap: "clamp(1rem, 4vw, 3rem)",
-              alignItems: "start",
-            }}
-          >
-            {[
-              {
-                value: vulns.count,
-                suffix: "",
-                started: vulns.started,
-                label: "Failles découvertes",
-                sub: "sur WordPress en 2025",
-                delay: "0s",
-              },
-              {
-                value: pluginPct.count,
-                suffix: "%",
-                started: pluginPct.started,
-                label: "Des intrusions",
-                sub: "viennent des plugins",
-                delay: "0.15s",
-              },
-              {
-                value: hours.count,
-                suffix: "h",
-                started: hours.started,
-                label: "Avant le 1er exploit",
-                sub: "après publication d'une faille",
-                delay: "0.3s",
-              },
-            ].map(({ value, suffix, started, label, sub, delay }) => (
-              <div key={label}>
-                <div
-                  className={started ? "stat-value" : ""}
-                  style={{
-                    fontFamily: "var(--font-mono)",
-                    fontWeight: 700,
-                    fontSize: "clamp(2rem, 7vw, 5rem)",
-                    lineHeight: 1,
-                    color: "#F9FAFB",
-                    fontVariantNumeric: "tabular-nums",
-                    marginBottom: "0.5rem",
-                    animationDelay: delay,
-                  }}
-                >
-                  {value.toLocaleString("fr-FR")}
-                  {suffix}
-                </div>
-                <p
-                  className="text-text-primary font-body"
-                  style={{ fontSize: "clamp(0.75rem, 1.8vw, 0.9rem)", fontWeight: 500, marginBottom: "0.2rem" }}
-                >
-                  {label}
-                </p>
-                <p
-                  className="text-text-muted/60 font-mono"
-                  style={{ fontSize: "0.65rem", lineHeight: 1.4 }}
-                >
-                  {sub}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ══════════════════════════════════════════════
-          HOW IT WORKS
-      ══════════════════════════════════════════════ */}
-      <section
-        style={{
-          background: "#0A0F1A",
-          borderTop: "1px solid rgba(255,255,255,0.05)",
-          padding: "clamp(3rem, 8vw, 6rem) clamp(1rem, 5vw, 3.5rem)",
-        }}
-      >
-        <div style={{ maxWidth: "56rem", margin: "0 auto" }}>
-          {/* Header */}
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "clamp(2rem, 5vw, 3rem)",
-            }}
-          >
-            <div>
-              <p
-                className="font-mono text-text-muted/50 uppercase tracking-widest"
-                style={{ fontSize: "0.6rem", marginBottom: "0.6rem" }}
-              >
-                — Processus
-              </p>
-              <h2
-                className="font-heading font-bold uppercase text-text-primary"
-                style={{ fontSize: "clamp(1.8rem, 5vw, 3.2rem)", lineHeight: 0.92 }}
-              >
-                Comment<br />ça marche
-              </h2>
-            </div>
-
-            {/* Steps */}
-            <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
+              gap: "clamp(1rem, 4vw, 2rem)",
+              textAlign: "center",
+            }}>
               {[
-                {
-                  n: "01",
-                  title: "Entrez votre URL",
-                  desc: "Notre scanner analyse votre site en parallèle. SSL, CMS, performance, 4 checks de sécurité.",
-                  tag: "~30 secondes",
-                  accent: false,
-                },
-                {
-                  n: "02",
-                  title: "Recevez votre score /100",
-                  desc: "3 checks gratuits révèlent les premiers problèmes. Le score résume votre niveau d'exposition réel.",
-                  tag: "Gratuit",
-                  accent: false,
-                },
-                {
-                  n: "03",
-                  title: "Débloquez le rapport complet",
-                  desc: "7 checks détaillés, recommandations priorisées, plan d'action concret. Rapport immédiat après paiement.",
-                  tag: "29€ HT",
-                  accent: true,
-                },
-              ].map(({ n, title, desc, tag, accent }, i) => (
-                <div
-                  key={n}
-                  style={{
-                    display: "flex",
-                    gap: "clamp(1rem, 3vw, 2rem)",
-                    padding: "clamp(1.25rem, 3vw, 1.75rem) 0",
-                    borderBottom: i < 2 ? "1px solid rgba(255,255,255,0.05)" : "none",
-                    alignItems: "flex-start",
-                  }}
-                >
-                  {/* Number */}
-                  <div
-                    style={{
-                      flexShrink: 0,
-                      width: "clamp(2.2rem, 5vw, 3rem)",
-                      height: "clamp(2.2rem, 5vw, 3rem)",
-                      borderRadius: "50%",
-                      background: accent ? "#2563EB" : "rgba(37,99,235,0.1)",
-                      border: accent ? "none" : "1px solid rgba(37,99,235,0.25)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginTop: "0.1rem",
-                    }}
-                  >
-                    <span
-                      className="font-mono font-bold"
-                      style={{
-                        fontSize: "clamp(0.6rem, 1.2vw, 0.7rem)",
-                        color: accent ? "#fff" : "#3B82F6",
-                      }}
-                    >
-                      {n}
-                    </span>
+                { value: vulns.count, suffix: "", color: "#EF4444", label: "Failles découvertes", sub: "WordPress, en 2025 seul" },
+                { value: pluginPct.count, suffix: "%", color: "#F1F5F9", label: "Viennent des plugins", sub: "Pas du cœur WordPress" },
+                { value: hours.count, suffix: "h", color: "#EF4444", label: "Délai moyen d'exploit", sub: "Après publication d'une faille" },
+              ].map(({ value, suffix, color, label, sub }) => (
+                <div key={label}>
+                  <div style={{
+                    fontFamily: "var(--font-heading)", fontWeight: 800,
+                    fontSize: "clamp(2rem, 5vw, 3.5rem)",
+                    color, lineHeight: 1, fontVariantNumeric: "tabular-nums",
+                  }}>
+                    {value.toLocaleString("fr-FR")}{suffix}
                   </div>
-
-                  {/* Content */}
-                  <div style={{ flex: 1 }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        flexWrap: "wrap",
-                        gap: "0.6rem",
-                        marginBottom: "0.4rem",
-                      }}
-                    >
-                      <h3
-                        className="font-heading font-semibold text-text-primary"
-                        style={{ fontSize: "clamp(1rem, 2.5vw, 1.2rem)" }}
-                      >
-                        {title}
-                      </h3>
-                      <span
-                        className="font-mono"
-                        style={{
-                          fontSize: "0.65rem",
-                          padding: "0.15rem 0.6rem",
-                          borderRadius: "999px",
-                          background: accent ? "rgba(37,99,235,0.2)" : "rgba(255,255,255,0.05)",
-                          color: accent ? "#3B82F6" : "#6B7280",
-                          letterSpacing: "0.03em",
-                        }}
-                      >
-                        {tag}
-                      </span>
-                    </div>
-                    <p
-                      className="text-text-muted"
-                      style={{ fontSize: "clamp(0.8rem, 1.8vw, 0.9rem)", lineHeight: 1.6 }}
-                    >
-                      {desc}
-                    </p>
-                  </div>
+                  <div style={{ fontWeight: 600, color: "#94A3B8", fontSize: "0.85rem", marginTop: 8 }}>{label}</div>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "#64748B", marginTop: 4 }}>{sub}</div>
                 </div>
               ))}
             </div>
+            <p style={{ textAlign: "center", fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "#64748B", marginTop: 16 }}>
+              Source : Patchstack — State of WordPress Security 2026
+            </p>
+          </div>
+        </section>
 
-            {/* Bottom CTA */}
-            <div style={{ paddingTop: "0.5rem" }}>
-              <a
-                href="#"
-                onClick={(e) => { e.preventDefault(); document.querySelector("input")?.focus(); }}
-                className="cta-btn inline-flex items-center gap-3 text-white font-heading font-bold uppercase"
-                style={{
-                  background: "linear-gradient(135deg, #2563EB 0%, #1D4ED8 100%)",
-                  borderRadius: "12px",
-                  padding: "0.9rem 1.75rem",
-                  fontSize: "clamp(0.8rem, 2vw, 0.9rem)",
-                  letterSpacing: "0.1em",
-                  textDecoration: "none",
-                }}
-              >
-                Lancer mon scan gratuit
-                <span style={{ opacity: 0.5, fontSize: "0.75rem" }}>↑</span>
-              </a>
+        {/* ── ICP — VOUS ÊTES CONCERNÉ ──────────────── */}
+        <section style={{ padding: `80px ${px}`, background: "#050A12" }}>
+          <div style={{ maxWidth: 1080, margin: "0 auto" }}>
+            <div style={{ textAlign: "center", marginBottom: 48 }}>
+              <div className="eyebrow">→ Vous êtes concerné</div>
+              <h2 className="section-title">
+                Votre site fonctionne.<br />Mais il accumule des risques invisibles.
+              </h2>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
+              {[
+                {
+                  icon: "⚡", bg: "rgba(239,68,68,0.08)",
+                  title: "Performance dégradée",
+                  desc: "Votre site met plus de 4 secondes à charger sur mobile. Vos visiteurs partent avant de voir votre offre. Google vous pénalise.",
+                  stat: "–7% de conversions par seconde de chargement supplémentaire",
+                },
+                {
+                  icon: "🔓", bg: "rgba(239,68,68,0.08)",
+                  title: "Failles de sécurité ouvertes",
+                  desc: "Plugins obsolètes, XML-RPC actif, page de login exposée — votre site est scanné par des bots toutes les 28 minutes en moyenne.",
+                  stat: "96% des pros WordPress ont déjà subi un incident — Melapress 2025",
+                },
+                {
+                  icon: "🔍", bg: "rgba(245,158,11,0.08)",
+                  title: "SEO technique invisible",
+                  desc: "Version WordPress visible, headers de sécurité absents, robots.txt mal configuré. Des signaux que Google lit, même si vous ne les voyez pas.",
+                  stat: "39% des sites piratés tournaient sur des logiciels obsolètes — Wordfence",
+                },
+              ].map(({ icon, bg, title, desc, stat }) => (
+                <div key={title} className="wp-card" style={{ padding: 32 }}>
+                  <div style={{ width: 48, height: 48, borderRadius: 10, background: bg, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.5rem", marginBottom: 20 }}>
+                    {icon}
+                  </div>
+                  <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 600, fontSize: "1.15rem", textTransform: "uppercase", letterSpacing: "0.02em", marginBottom: 12, color: "#F1F5F9" }}>
+                    {title}
+                  </h3>
+                  <p style={{ color: "#94A3B8", fontSize: "0.9rem", lineHeight: 1.6, marginBottom: 16 }}>{desc}</p>
+                  <div style={{
+                    fontFamily: "var(--font-mono)", fontSize: "0.8rem", color: "#EF4444",
+                    paddingTop: 16, borderTop: "1px solid rgba(255,255,255,0.06)",
+                  }}>{stat}</div>
+                </div>
+              ))}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* ══════════════════════════════════════════════
-          FOOTER
-      ══════════════════════════════════════════════ */}
-      <footer
-        style={{
-          borderTop: "1px solid rgba(255,255,255,0.04)",
-          padding: "1.5rem clamp(1rem, 5vw, 3.5rem)",
-        }}
-      >
-        <div
-          style={{
-            maxWidth: "56rem",
-            margin: "0 auto",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: "0.75rem",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <span
-              style={{
-                width: 5,
-                height: 5,
-                borderRadius: "50%",
-                background: "rgba(59,130,246,0.4)",
-              }}
-            />
-            <span className="font-mono text-text-muted/40" style={{ fontSize: "0.65rem" }}>
-              WPulse ·{" "}
-              <a
-                href="https://quantumdev.fr"
-                style={{ color: "inherit", textDecoration: "none" }}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                QuantumDev
-              </a>
-            </span>
+        {/* ── WHAT YOU GET ─────────────────────────── */}
+        <section style={{ padding: `80px ${px}`, background: "#0B1120" }}>
+          <div style={{ maxWidth: 1080, margin: "0 auto" }}>
+            <div style={{ textAlign: "center", marginBottom: 48 }}>
+              <div className="eyebrow">→ Ce que vous obtenez</div>
+              <h2 className="section-title">Un diagnostic en deux niveaux</h2>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 48 }}>
+              {/* Free */}
+              <div>
+                <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: "1.3rem", textTransform: "uppercase", marginBottom: 24, display: "flex", alignItems: "center", gap: 12, color: "#F1F5F9" }}>
+                  Scan gratuit <span className="tag-free">0€</span>
+                </h3>
+                <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 16 }}>
+                  {[
+                    "Score global de santé /100",
+                    "Certificat SSL valide ou non",
+                    "Détection WordPress + version",
+                    "Score PageSpeed mobile",
+                  ].map(item => (
+                    <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: 12, fontSize: "0.9rem", color: "#94A3B8", lineHeight: 1.5 }}>
+                      <span style={{ color: "#22C55E", fontSize: "1.1rem", flexShrink: 0 }}>✓</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {/* Paid */}
+              <div>
+                <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: "1.3rem", textTransform: "uppercase", marginBottom: 24, display: "flex", alignItems: "center", gap: 12, color: "#F1F5F9" }}>
+                  Rapport complet <span className="tag-paid">29€ HT</span>
+                </h3>
+                <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: 16 }}>
+                  {[
+                    "Audit headers de sécurité (6 tests)",
+                    "XML-RPC exposé ou bloqué",
+                    "Page de login accessible publiquement",
+                    "Version WordPress visible dans le code",
+                    "Recommandations priorisées + plan d'action",
+                  ].map(item => (
+                    <li key={item} style={{ display: "flex", alignItems: "flex-start", gap: 12, fontSize: "0.9rem", color: "#94A3B8", lineHeight: 1.5 }}>
+                      <span style={{ color: "#60A5FA", fontSize: "1rem", flexShrink: 0 }}>🔒</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           </div>
-          <div style={{ display: "flex", gap: "1.5rem" }}>
-            {[
-              { label: "Mentions légales", href: "/mentions-legales" },
-              { label: "CGV", href: "/cgv" },
-            ].map(({ label, href }) => (
-              <a
-                key={href}
-                href={href}
-                className="font-mono text-text-muted/35 hover:text-text-secondary transition"
-                style={{ fontSize: "0.65rem", textDecoration: "none" }}
-              >
-                {label}
-              </a>
+        </section>
+
+        {/* ── HOW IT WORKS ──────────────────────────── */}
+        <section style={{ padding: `80px ${px}`, background: "#050A12" }}>
+          <div style={{ maxWidth: 1080, margin: "0 auto" }}>
+            <div style={{ textAlign: "center", marginBottom: 48 }}>
+              <div className="eyebrow">→ Processus</div>
+              <h2 className="section-title">Comment ça marche</h2>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 32 }}>
+              {[
+                { n: "01", title: "Entrez votre URL", desc: "Notre scanner analyse votre site en parallèle : SSL, CMS, performance, 4 checks sécurité.", tag: "~30 secondes", tagClass: "tag-free" },
+                { n: "02", title: "Recevez votre score", desc: "3 checks gratuits révèlent les premiers problèmes. Le score résume votre niveau d'exposition réel.", tag: "Gratuit", tagClass: "tag-free" },
+                { n: "03", title: "Débloquez le rapport", desc: "7 checks détaillés, recommandations priorisées, plan d'action concret. Rapport immédiat après paiement.", tag: "29€ HT", tagClass: "tag-paid" },
+              ].map(({ n, title, desc, tag, tagClass }) => (
+                <div key={n} style={{ textAlign: "center", padding: "32px 24px" }}>
+                  <div style={{
+                    fontFamily: "var(--font-heading)", fontWeight: 800,
+                    fontSize: "3rem", lineHeight: 1,
+                    color: "#0B1120", WebkitTextStroke: "1px rgba(255,255,255,0.1)",
+                    marginBottom: 16,
+                  }}>{n}</div>
+                  <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 600, fontSize: "1.1rem", textTransform: "uppercase", marginBottom: 12, color: "#F1F5F9" }}>{title}</h3>
+                  <p style={{ color: "#64748B", fontSize: "0.85rem", lineHeight: 1.5, marginBottom: 12 }}>{desc}</p>
+                  <span className={tagClass}>{tag}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── SOCIAL PROOF ──────────────────────────── */}
+        <section style={{ padding: `80px ${px}`, background: "#0B1120", textAlign: "center" }}>
+          <div style={{ maxWidth: 720, margin: "0 auto" }}>
+            <div className="eyebrow">→ Expertise terrain</div>
+            <h2 className="section-title">Construit par un spécialiste<br />audit &amp; maintenance WordPress</h2>
+            <blockquote style={{
+              fontSize: "clamp(1rem, 2.5vw, 1.3rem)",
+              fontStyle: "italic", color: "#94A3B8",
+              margin: "40px auto", lineHeight: 1.7,
+              position: "relative", maxWidth: 640,
+            }}>
+              <span style={{
+                fontFamily: "var(--font-heading)", fontSize: "5rem",
+                color: "#3B82F6", opacity: 0.3,
+                position: "absolute", top: -30, left: -20, lineHeight: 1,
+              }}>&ldquo;</span>
+              WPulse automatise les 7 premiers checks que je réalise manuellement sur chaque site que j&apos;audite.
+              Si votre score est inférieur à 60, votre site a besoin d&apos;attention — pas demain, maintenant.
+              <footer style={{ fontFamily: "var(--font-mono)", fontSize: "0.8rem", color: "#64748B", marginTop: 16, fontStyle: "normal" }}>
+                — Quentin · QuantumDev · Tours
+              </footer>
+            </blockquote>
+            <div style={{ display: "flex", justifyContent: "center", gap: "clamp(1.5rem, 5vw, 3rem)", marginTop: 48, flexWrap: "wrap" }}>
+              {[
+                { n: "50+", label: "Sites audités" },
+                { n: "38/100", label: "Score moyen constaté" },
+                { n: "96%", label: "Avaient au moins 1 faille critique" },
+              ].map(({ n, label }) => (
+                <div key={label} style={{ textAlign: "center" }}>
+                  <div style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: "1.5rem", color: "#F1F5F9" }}>{n}</div>
+                  <div style={{ fontFamily: "var(--font-mono)", fontSize: "0.7rem", color: "#64748B", marginTop: 8 }}>{label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── CTA FINAL ─────────────────────────────── */}
+        <section style={{ padding: `96px ${px}`, background: "#050A12", textAlign: "center" }}>
+          <div style={{ maxWidth: 720, margin: "0 auto" }}>
+            <h2 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "clamp(2rem, 5vw, 3rem)", textTransform: "uppercase", marginBottom: 16, color: "#F1F5F9" }}>
+              Votre site est exposé.<br /><span style={{ color: "#3B82F6" }}>Vérifiez-le maintenant.</span>
+            </h2>
+            <p style={{ color: "#94A3B8", fontSize: "1.05rem", marginBottom: 40, maxWidth: 480, marginLeft: "auto", marginRight: "auto" }}>
+              Scan gratuit en 30 secondes. Aucune inscription requise.
+            </p>
+            <a
+              href="#"
+              onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); setTimeout(() => document.querySelector<HTMLInputElement>("input[type=text]")?.focus(), 500); }}
+              className="cta-btn"
+              style={{
+                display: "inline-flex", alignItems: "center", gap: 12,
+                padding: "18px 40px",
+                background: "#2563EB", color: "white",
+                borderRadius: 12, textDecoration: "none",
+                fontFamily: "var(--font-heading)", fontWeight: 700,
+                fontSize: "1.1rem", letterSpacing: "0.06em",
+                textTransform: "uppercase",
+              }}
+            >
+              Scanner mon site gratuitement
+              <span style={{ fontSize: "1.3rem" }}>→</span>
+            </a>
+            <p style={{ fontFamily: "var(--font-mono)", fontSize: "0.75rem", color: "#64748B", marginTop: 20 }}>
+              Gratuit · Sans carte bancaire · Résultat immédiat
+            </p>
+          </div>
+        </section>
+
+        {/* ── FOOTER ────────────────────────────────── */}
+        <footer style={{
+          padding: `32px ${px}`,
+          borderTop: "1px solid rgba(255,255,255,0.06)",
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+          flexWrap: "wrap", gap: 16,
+          fontSize: "0.8rem", color: "#64748B",
+        }}>
+          <div>
+            <span style={{ color: "#94A3B8" }}>WPulse</span> · by{" "}
+            <a href="https://quantumdev.fr" style={{ color: "#64748B", textDecoration: "none" }} target="_blank" rel="noopener noreferrer">QuantumDev</a>
+          </div>
+          <div style={{ display: "flex", gap: 24 }}>
+            {[{ label: "Mentions légales", href: "/mentions-legales" }, { label: "CGV", href: "/cgv" }].map(({ label, href }) => (
+              <a key={href} href={href} style={{ color: "#64748B", textDecoration: "none" }}>{label}</a>
             ))}
           </div>
-        </div>
-      </footer>
-    </main>
+        </footer>
+
+      </main>
+    </>
   );
 }

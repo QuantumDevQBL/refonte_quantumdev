@@ -3,6 +3,7 @@ import { getCache } from "@/lib/cache";
 import type { ScanResult } from "@/lib/scanner";
 import { ScoreCircle } from "@/components/ScoreCircle";
 import { CheckItem } from "@/components/CheckItem";
+import { Nav } from "@/components/Nav";
 
 interface ReportPageProps {
   searchParams: Promise<{ session_id?: string }>;
@@ -37,15 +38,18 @@ const SECURITY_HEADER_LABELS: Record<string, { label: string; desc: string }> = 
 
 function ErrorMessage({ message }: { message: string }) {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4 text-center gap-4 bg-bg-dark">
-      <p className="text-text-secondary max-w-sm">{message}</p>
-      <a
-        href="/"
-        className="px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold transition"
-      >
-        Nouveau scan
-      </a>
-    </main>
+    <>
+      <Nav />
+      <main className="min-h-screen flex flex-col items-center justify-center px-4 text-center gap-4" style={{ background: "#050A12", paddingTop: 64 }}>
+        <p className="text-text-secondary max-w-sm">{message}</p>
+        <a
+          href="/"
+          className="px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold transition"
+        >
+          Nouveau scan
+        </a>
+      </main>
+    </>
   );
 }
 
@@ -85,7 +89,9 @@ async function ReportContent({ sessionId }: { sessionId: string }) {
   const allSecurityHeaders = Object.keys(SECURITY_HEADER_LABELS);
 
   return (
-    <main className="min-h-screen pb-16 bg-bg-dark">
+    <>
+      <Nav />
+      <main className="min-h-screen pb-16 bg-bg-dark" style={{ paddingTop: 64 }}>
       {/* Header */}
       <div className="bg-bg-section border-b border-white/5 px-4 py-4">
         <div className="max-w-xl mx-auto">
@@ -239,6 +245,7 @@ async function ReportContent({ sessionId }: { sessionId: string }) {
         </div>
       </div>
     </main>
+    </>
   );
 }
 

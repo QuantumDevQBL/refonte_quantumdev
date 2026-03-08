@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ScanAnimation } from "@/components/ScanAnimation";
+import { Nav } from "@/components/Nav";
 
 const SCAN_STEPS = [
   "Résolution DNS...",
@@ -62,61 +63,67 @@ function ScanPageContent() {
 
   if (error) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center px-4 text-center bg-bg-dark">
-        <p className="text-danger text-lg mb-4 max-w-sm">{error}</p>
-        <button
-          onClick={() => router.push("/")}
-          className="px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold transition"
-        >
-          Réessayer
-        </button>
-      </main>
+      <>
+        <Nav />
+        <main className="min-h-screen flex flex-col items-center justify-center px-4 text-center" style={{ background: "#050A12", paddingTop: 64 }}>
+          <p className="text-danger text-lg mb-4 max-w-sm">{error}</p>
+          <button
+            onClick={() => router.push("/")}
+            className="px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold transition"
+          >
+            Réessayer
+          </button>
+        </main>
+      </>
     );
   }
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center px-4 text-center bg-bg-dark">
-      <div className="max-w-sm w-full">
-        <ScanAnimation />
+    <>
+      <Nav />
+      <main className="min-h-screen flex flex-col items-center justify-center px-4 text-center" style={{ background: "#050A12", paddingTop: 64 }}>
+        <div className="max-w-sm w-full">
+          <ScanAnimation />
 
-        <div className="mt-8">
-          <p className="text-text-primary font-semibold mb-1">
-            Analyse en cours...
-          </p>
-          {url && (
-            <p className="text-text-muted text-sm font-mono truncate">{decodeURIComponent(url)}</p>
-          )}
-        </div>
+          <div className="mt-8">
+            <p className="text-text-primary font-semibold mb-1">
+              Analyse en cours...
+            </p>
+            {url && (
+              <p className="text-text-muted text-sm font-mono truncate">{decodeURIComponent(url)}</p>
+            )}
+          </div>
 
-        <div className="mt-6 space-y-2 text-left">
-          {SCAN_STEPS.map((step, i) => (
-            <div
-              key={step}
-              className={`flex items-center gap-2 text-sm transition-opacity duration-500 ${
-                i <= currentStep ? "opacity-100" : "opacity-20"
-              }`}
-            >
-              <span
-                className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                  i < currentStep
-                    ? "bg-success"
-                    : i === currentStep
-                    ? "bg-primary-500 animate-pulse"
-                    : "bg-text-muted"
+          <div className="mt-6 space-y-2 text-left">
+            {SCAN_STEPS.map((step, i) => (
+              <div
+                key={step}
+                className={`flex items-center gap-2 text-sm transition-opacity duration-500 ${
+                  i <= currentStep ? "opacity-100" : "opacity-20"
                 }`}
-              />
-              <span
-                className={
-                  i < currentStep ? "text-text-muted" : "text-text-secondary"
-                }
               >
-                {step}
-              </span>
-            </div>
-          ))}
+                <span
+                  className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                    i < currentStep
+                      ? "bg-success"
+                      : i === currentStep
+                      ? "bg-primary-500 animate-pulse"
+                      : "bg-text-muted"
+                  }`}
+                />
+                <span
+                  className={
+                    i < currentStep ? "text-text-muted" : "text-text-secondary"
+                  }
+                >
+                  {step}
+                </span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   );
 }
 
@@ -124,7 +131,7 @@ export default function ScanPage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen flex items-center justify-center bg-bg-dark">
+        <main className="min-h-screen flex items-center justify-center" style={{ background: "#050A12" }}>
           <div className="w-6 h-6 rounded-full border-2 border-primary-500 border-t-transparent animate-spin" />
         </main>
       }

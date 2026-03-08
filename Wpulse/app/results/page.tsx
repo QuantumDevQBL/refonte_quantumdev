@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { ScoreCircle } from "@/components/ScoreCircle";
 import { CheckItem } from "@/components/CheckItem";
 import { LockedCheck } from "@/components/LockedCheck";
+import { Nav } from "@/components/Nav";
 import type { ScanResult } from "@/lib/scanner";
 
 type ScanData = ScanResult & { scanId: string };
@@ -63,23 +64,29 @@ function ResultsContent() {
 
   if (error) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center px-4 text-center gap-4 bg-bg-dark">
-        <p className="text-text-secondary max-w-sm">{error}</p>
-        <button
-          onClick={() => router.push("/")}
-          className="px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold transition"
-        >
-          Nouveau scan
-        </button>
-      </main>
+      <>
+        <Nav />
+        <main className="min-h-screen flex flex-col items-center justify-center px-4 text-center gap-4 bg-bg-dark" style={{ paddingTop: 64 }}>
+          <p className="text-text-secondary max-w-sm">{error}</p>
+          <button
+            onClick={() => router.push("/")}
+            className="px-5 py-2.5 rounded-xl bg-primary-600 hover:bg-primary-700 text-white font-semibold transition"
+          >
+            Nouveau scan
+          </button>
+        </main>
+      </>
     );
   }
 
   if (!data) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-bg-dark">
-        <div className="w-6 h-6 rounded-full border-2 border-primary-500 border-t-transparent animate-spin" />
-      </main>
+      <>
+        <Nav />
+        <main className="min-h-screen flex items-center justify-center bg-bg-dark" style={{ paddingTop: 64 }}>
+          <div className="w-6 h-6 rounded-full border-2 border-primary-500 border-t-transparent animate-spin" />
+        </main>
+      </>
     );
   }
 
@@ -97,7 +104,9 @@ function ResultsContent() {
     (checks.pagespeed.score ?? 0) >= 75;
 
   return (
-    <main className="min-h-screen flex flex-col pb-32 bg-bg-dark">
+    <>
+      <Nav />
+      <main className="min-h-screen flex flex-col pb-32 bg-bg-dark" style={{ paddingTop: 64 }}>
       {/* Header */}
       <div className="bg-bg-section border-b border-white/5 px-4 py-4">
         <div className="max-w-xl mx-auto">
@@ -202,6 +211,7 @@ function ResultsContent() {
         </div>
       </div>
     </main>
+    </>
   );
 }
 
@@ -209,7 +219,7 @@ export default function ResultsPage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen flex items-center justify-center bg-bg-dark">
+        <main className="min-h-screen flex items-center justify-center" style={{ background: "#050A12" }}>
           <div className="w-6 h-6 rounded-full border-2 border-primary-500 border-t-transparent animate-spin" />
         </main>
       }
