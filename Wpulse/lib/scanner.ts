@@ -51,11 +51,11 @@ export async function checkSSL(url: string): Promise<ScanResult["checks"]["ssl"]
 }
 
 export async function checkWordPress(
-  url: string
+  url: string,
+  html: string
 ): Promise<ScanResult["checks"]["wordpress"]> {
   try {
-    const res = await withTimeout(fetch(url, { redirect: "follow" }), TIMEOUT_MS);
-    const html = await res.text();
+    if (!html) return { detected: false };
 
     const generatorMatch = html.match(
       /<meta[^>]+name=["']generator["'][^>]+content=["']WordPress ([^"']+)["']/i
@@ -180,9 +180,9 @@ export async function checkLoginPage(
   }
 }
 
-export async function checkWpVersion(
+export function checkWpVersion(
   html: string
-): Promise<ScanResult["checks"]["wpVersion"]> {
+): ScanResult["checks"]["wpVersion"] {
   const generatorMatch = html.match(
     /<meta[^>]+name=["']generator["'][^>]+content=["']WordPress ([^"']+)["']/i
   );
@@ -210,7 +210,7 @@ export async function runScan(url: string): Promise<Omit<ScanResult, "score">> {
 
   const results = await Promise.allSettled([
     checkSSL(url),
-    checkWordPress(url),
+    checkWordPress(url, html),
     checkPageSpeed(url),
     checkSecurityHeaders(url),
     checkXmlRpc(url),

@@ -27,7 +27,29 @@ function isRateLimited(ip: string): boolean {
 function isValidUrl(url: string): boolean {
   try {
     const parsed = new URL(url);
-    return parsed.protocol === "http:" || parsed.protocol === "https:";
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") return false;
+
+    const hostname = parsed.hostname.toLowerCase();
+
+    // Block loopback
+    if (hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1") return false;
+
+    // Block private IPv4 ranges (RFC 1918 + link-local + CGNAT)
+    const privateRanges = [
+      /^10\./,
+      /^172\.(1[6-9]|2\d|3[01])\./,
+      /^192\.168\./,
+      /^169\.254\./,
+      /^100\.(6[4-9]|[7-9]\d|1[01]\d|12[0-7])\./,
+    ];
+    for (const range of privateRanges) {
+      if (range.test(hostname)) return false;
+    }
+
+    // Block internal TLDs
+    if (hostname.endsWith(".local") || hostname.endsWith(".internal") || hostname.endsWith(".localhost")) return false;
+
+    return true;
   } catch {
     return false;
   }
@@ -81,7 +103,19 @@ export async function POST(req: NextRequest) {
     const scanId = uuidv4();
     setCache(scanId, result);
 
-    return NextResponse.json({ scanId, ...result });
+    const publicResult = {
+      scanId,
+      url: result.url,
+      scannedAt: result.scannedAt,
+      score: result.score,
+      checks: {
+        ssl: result.checks.ssl,
+        wordpress: result.checks.wordpress,
+        pagespeed: result.checks.pagespeed,
+      },
+    };
+
+    return NextResponse.json(publicResult);
   } catch (err) {
     const message =
       err instanceof Error && err.message === "Scan timeout"

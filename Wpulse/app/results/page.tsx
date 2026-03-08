@@ -94,7 +94,7 @@ function ResultsContent() {
 
   const pagespeedPassed =
     checks.pagespeed.status !== "untested" &&
-    (checks.pagespeed.score ?? 0) >= 50;
+    (checks.pagespeed.score ?? 0) >= 75;
 
   return (
     <main className="min-h-screen flex flex-col pb-32 bg-bg-dark">

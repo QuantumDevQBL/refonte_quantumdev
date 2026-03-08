@@ -50,6 +50,11 @@ function ErrorMessage({ message }: { message: string }) {
 }
 
 async function ReportContent({ sessionId }: { sessionId: string }) {
+  // Quick format guard before hitting Stripe API
+  if (!sessionId.startsWith("cs_") || sessionId.length > 200) {
+    return <ErrorMessage message="Session de paiement invalide." />;
+  }
+
   let scanData: ScanResult | null = null;
 
   try {
