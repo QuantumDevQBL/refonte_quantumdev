@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d/projects/agences/quantumdev/refonte_quantumdev/**)",
+      "Bash(npx create-next-app@latest Wpulse --typescript --tailwind --app --src-dir=false --import-alias=\"@/*\" --no-eslint --yes)",
+      "Bash(npx create-next-app@latest:*)",
+      "Bash(cp:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)"
+    ]
+  }
+}
